@@ -183,7 +183,7 @@ const CVSSVectorFinder = () => {
           {expandedNodes.includes(suggestion.id) ? <FaMinus /> : <FaPlus />}
         </span>
       ) : null}
-      {suggestion.id} - {suggestion.cvss_v3 || 'No CVSS vector available'}
+      {suggestion.id}  {suggestion.cvss_v3 || ''}
       {expandedNodes.includes(suggestion.id) &&
         suggestion.children &&
         suggestion.children.map((child) => (
