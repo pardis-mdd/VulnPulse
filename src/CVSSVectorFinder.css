@@ -8,6 +8,7 @@ body {
 }
 
 .container {
+  
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
@@ -25,10 +26,16 @@ h1 {
   margin-bottom: 20px;
 }
 
+.input-container {
+  position: relative;
+  width: 100%;
+}
+
+/* Style the input field */
 input {
   font-family: 'Lato', sans-serif;
-  width: calc(100% - 22px); /* Adjust width to account for padding */
-  padding: 12px 16px;
+  width: calc(100% - 22px); /* Adjust width to account for padding and icon */
+  padding: 12px 16px 12px 40px; /* Adjust padding to make space for the icon */
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -40,6 +47,21 @@ input {
 input:focus {
   border-color: #66afe9;
   outline: none;
+}
+
+/* Style for the trash icon */
+.clear-icon {
+  position: absolute;
+  top: 35%;
+  right:40px; /* Adjust based on padding of the input */
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #888;
+  font-size: 18px;
+}
+
+.clear-icon:hover {
+  color: #f00; /* Change color on hover */
 }
 
 .suggestions-container {
@@ -101,6 +123,7 @@ ul.react-autosuggest__suggestions-list {
 
 .selected-vector,
 .calculated-scores {
+  font-size: 202px;
   margin-top: 20px;
   padding: 15px;
   border: 1px solid #ddd;
