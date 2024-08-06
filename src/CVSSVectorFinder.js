@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Autosuggest from 'react-autosuggest';
+import { FaPlus, FaMinus } from 'react-icons/fa'; // Import FontAwesome icons
 import './CVSSVectorFinder.css';
 
 const CVSS31 = {
@@ -85,6 +86,7 @@ const CVSSVectorFinder = () => {
   const [value, setValue] = useState('');
   const [selectedVector, setSelectedVector] = useState('');
   const [calculatedScore, setCalculatedScore] = useState('');
+  const [expandedNodes, setExpandedNodes] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -160,22 +162,54 @@ const CVSSVectorFinder = () => {
       (item) => item.id.toLowerCase().slice(0, inputLength) === inputValue
     );
 
-    // Include children suggestions if no direct matches have cvss_v3
-    const additionalSuggestions = matches.flatMap((match) => {
-      const node = findNode(data, match.id);
-      return node ? collectSuggestions(node) : [];
-    });
-
-    return [...matches, ...additionalSuggestions];
+    return matches;
   };
 
   const getSuggestionValue = (suggestion) => suggestion.id;
 
   const renderSuggestion = (suggestion) => (
-    <div className="suggestion">
+    <div
+      className="suggestion"
+      onClick={() => handleSuggestionClick(suggestion)}
+    >
+      {suggestion.children ? (
+        <span
+          className="toggle-button"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleNodeExpansion(suggestion.id);
+          }}
+        >
+          {expandedNodes.includes(suggestion.id) ? <FaMinus /> : <FaPlus />}
+        </span>
+      ) : null}
       {suggestion.id} - {suggestion.cvss_v3 || 'No CVSS vector available'}
+      {expandedNodes.includes(suggestion.id) &&
+        suggestion.children &&
+        suggestion.children.map((child) => (
+          <div key={child.id} className="suggestion-child">
+            {renderSuggestion(child)}
+          </div>
+        ))}
     </div>
   );
+
+  const handleSuggestionClick = (suggestion) => {
+    if (suggestion.cvss_v3) {
+      setSelectedVector(suggestion.cvss_v3);
+      calculateCVSS(suggestion.cvss_v3);
+    } else {
+      toggleNodeExpansion(suggestion.id);
+    }
+  };
+
+  const toggleNodeExpansion = (id) => {
+    setExpandedNodes((prevExpandedNodes) =>
+      prevExpandedNodes.includes(id)
+        ? prevExpandedNodes.filter((nodeId) => nodeId !== id)
+        : [...prevExpandedNodes, id]
+    );
+  };
 
   const onChange = (event, { newValue }) => {
     setValue(newValue);
@@ -190,8 +224,7 @@ const CVSSVectorFinder = () => {
   };
 
   const onSuggestionSelected = (event, { suggestion }) => {
-    setSelectedVector(suggestion.cvss_v3);
-    calculateCVSS(suggestion.cvss_v3);
+    handleSuggestionClick(suggestion);
   };
 
   const inputProps = {
@@ -231,7 +264,6 @@ const CVSSVectorFinder = () => {
         onSuggestionSelected={onSuggestionSelected}
         inputProps={inputProps}
       />
-      
       {calculatedScore && (
         <div className="calculated-score">
           <h2>Calculated CVSS Score:</h2>
