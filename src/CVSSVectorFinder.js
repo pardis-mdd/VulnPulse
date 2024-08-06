@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Autosuggest from 'react-autosuggest';
-import { FaPlus, FaMinus } from 'react-icons/fa'; // Import FontAwesome icons
+import { FaPlus, FaMinus, FaTrash } from 'react-icons/fa'; // Import FontAwesome icons
 import './CVSSVectorFinder.css';
 
 const CVSS31 = {
@@ -183,7 +183,7 @@ const CVSSVectorFinder = () => {
           {expandedNodes.includes(suggestion.id) ? <FaMinus /> : <FaPlus />}
         </span>
       ) : null}
-      {suggestion.id}  {suggestion.cvss_v3 || ''}
+      {suggestion.id} {suggestion.cvss_v3 || ''}
       {expandedNodes.includes(suggestion.id) &&
         suggestion.children &&
         suggestion.children.map((child) => (
@@ -233,6 +233,12 @@ const CVSSVectorFinder = () => {
     onChange,
   };
 
+  const clearInput = () => {
+    setValue(''); // Clear the input value
+    setSuggestions([]); // Clear suggestions
+    setCalculatedScore(''); // Clear the calculated score
+  };
+
   const calculateCVSS = (vector) => {
     try {
       const output = calculateCVSSFromVector(vector);
@@ -254,16 +260,19 @@ const CVSSVectorFinder = () => {
 
   return (
     <div className="container">
-      <h1>CVSS Vector Finder</h1>
-      <Autosuggest
-        suggestions={suggestions}
-        onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-        onSuggestionsClearRequested={onSuggestionsClearRequested}
-        getSuggestionValue={getSuggestionValue}
-        renderSuggestion={renderSuggestion}
-        onSuggestionSelected={onSuggestionSelected}
-        inputProps={inputProps}
-      />
+      <h1>CVSS Vector & Score Finder</h1>
+      <div className="input-container">
+        <Autosuggest
+          suggestions={suggestions}
+          onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+          onSuggestionsClearRequested={onSuggestionsClearRequested}
+          getSuggestionValue={getSuggestionValue}
+          renderSuggestion={renderSuggestion}
+          onSuggestionSelected={onSuggestionSelected}
+          inputProps={inputProps}
+        />
+        <FaTrash className="clear-icon" onClick={clearInput} />
+      </div>
       {calculatedScore && (
         <div className="calculated-score">
           <h2>Calculated CVSS Score:</h2>
