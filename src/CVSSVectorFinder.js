@@ -69,7 +69,6 @@ function calculateCVSSFromVector(vector) {
   }
 }
 
-
 function determineSeverity(score) {
   const ratings = CVSS31.severityRatings;
   for (let i = 0; i < ratings.length; i++) {
@@ -97,7 +96,13 @@ const CVSSVectorFinder = () => {
           throw new Error('Network response was not ok');
         }
         const result = await response.json();
-        setData(flattenData(result));
+
+        // Ensure data is an array
+        if (Array.isArray(result.content)) {
+          setData(flattenData(result.content));
+        } else {
+          console.error('Unexpected data format:', result);
+        }
       } catch (error) {
         console.error('Error fetching the data:', error);
       }
@@ -106,37 +111,69 @@ const CVSSVectorFinder = () => {
     fetchData();
   }, []);
 
-  const flattenData = (data) => {
+  const flattenData = (nodes) => {
     const flatten = (nodes, parentPath = '') => {
       return nodes.reduce((acc, node) => {
         const fullPath = parentPath ? `${parentPath}/${node.id}` : node.id;
-        acc.push({ id: node.id, cvss_v3: node.cvss_v3 || '', path: fullPath });
+        acc.push({ id: node.id, cvss_v3: node.cvss_v3 || '', path: fullPath, children: node.children });
         if (node.children) {
           acc.push(...flatten(node.children, fullPath));
         }
         return acc;
       }, []);
     };
-    return flatten(data.content);
+    return flatten(nodes);
+  };
+
+  const findNode = (nodes, id) => {
+    for (let node of nodes) {
+      if (node.id === id) return node;
+      if (node.children) {
+        const result = findNode(node.children, id);
+        if (result) return result;
+      }
+    }
+    return null;
+  };
+
+  const collectSuggestions = (node) => {
+    const suggestions = [];
+    if (node.cvss_v3) {
+      suggestions.push(node);
+    } else {
+      (node.children || []).forEach(child => {
+        suggestions.push(child);
+        suggestions.push(...collectSuggestions(child));
+      });
+    }
+    return suggestions;
   };
 
   const getSuggestions = (value) => {
     const inputValue = value.trim().toLowerCase();
     const inputLength = inputValue.length;
 
-    return inputLength === 0
-      ? []
-      : data.filter(
-          (item) =>
-            item.id.toLowerCase().slice(0, inputLength) === inputValue
-        );
+    if (inputLength === 0) return [];
+
+    // Find direct matches
+    const matches = data.filter(
+      (item) => item.id.toLowerCase().slice(0, inputLength) === inputValue
+    );
+
+    // Include children suggestions if no direct matches have cvss_v3
+    const additionalSuggestions = matches.flatMap((match) => {
+      const node = findNode(data, match.id);
+      return node ? collectSuggestions(node) : [];
+    });
+
+    return [...matches, ...additionalSuggestions];
   };
 
   const getSuggestionValue = (suggestion) => suggestion.id;
 
   const renderSuggestion = (suggestion) => (
     <div className="suggestion">
-      {suggestion.id} - {suggestion.cvss_v3}
+      {suggestion.id} - {suggestion.cvss_v3 || 'No CVSS vector available'}
     </div>
   );
 
