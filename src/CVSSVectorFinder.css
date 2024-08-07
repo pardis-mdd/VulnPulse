@@ -47,14 +47,14 @@ input {
 }
 
 input:focus {
-  border-color:#04214d;
+  border-color: #04214d;
   outline: none;
 }
 
 .clear-icon {
   position: absolute;
-  top: 35%;
-  right: 3em; 
+  top: 1.5em;
+  right: 2em; 
   transform: translateY(-50%);
   cursor: pointer;
   color: #888;
@@ -116,13 +116,13 @@ ul.react-autosuggest__suggestions-list {
   vertical-align: middle;
 }
 
-.toggle-button:hover{
+.toggle-button:hover {
   color: #0c5bd1;
 }
+
 .selected-vector,
 .calculated-scores {
- 
-  font-size: 202px;
+  font-size: 20px;
   margin-top: 20px;
   padding: 15px;
   border: 1px solid #ddd;
@@ -175,10 +175,110 @@ ul.react-autosuggest__suggestions-list {
   color: #d9534f;
   font-weight: bold;
 }
-.preCalc{
+
+.preCalc {
   text-align: center;
   font-size: 20px;
   font-family: "Pacifico", cursive;
   color: #514fd9;
   font-weight: bold;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .container {
+    max-width: 90%;
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  input {
+    font-size: 14px;
+    padding: 10px 12px 10px 8px;
+  }
+
+  .clear-icon {
+    top: 9.3em;
+    right: 10%;
+    font-size: 16px;
+  }
+
+  .selected-vector,
+  .calculated-scores {
+    font-size: 18px;
+    padding: 10px;
+  }
+
+  .selected-vector h2,
+  .calculated-scores h2 {
+    font-size: 1.2em;
+  }
+
+  .selected-vector p,
+  .calculated-scores p {
+    font-size: 14px;
+  }
+
+  .score-item h3 {
+    font-size: 1em;
+  }
+
+  .score-item p {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 1.5em;
+  }
+
+  input {
+    font-size: 12px;
+    padding: 8px 10px 8px 6px;
+  }
+
+  .clear-icon {
+    top: 9.3em;
+    right: 5%;
+    font-size: 14px;
+  }
+
+  .selected-vector,
+  .calculated-scores {
+    font-size: 16px;
+    padding: 8px;
+  }
+
+  .selected-vector h2,
+  .calculated-scores h2 {
+    font-size: 1em;
+  }
+
+  .selected-vector p,
+  .calculated-scores p {
+    font-size: 12px;
+  }
+
+  .score-item h3 {
+    font-size: 0.9em;
+  }
+
+  .score-item p {
+    font-size: 12px;
+  }
+}
+@media (max-width: 770px) {
+  .clear-icon {
+    top: 1.3em;           
+    right: 2em;      
+    font-size: 1em;  
+  }
 }
