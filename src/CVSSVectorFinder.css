@@ -53,9 +53,9 @@ input:focus {
 }
 
 .clear-icon {
-  position: fixed;
-  top: 23%;
-  right:410px; 
+  position: absolute;
+  top: 35%;
+  right: 3em; 
   transform: translateY(-50%);
   cursor: pointer;
   color: #888;
