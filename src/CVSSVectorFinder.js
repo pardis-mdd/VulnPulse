@@ -102,7 +102,7 @@ const CVSSVectorFinder = () => {
         if (Array.isArray(result.content)) {
           const flattenedData = flattenData(result.content);
           setData(flattenedData);
-          console.log('Flattened Data:', flattenedData); // Debug output
+          console.log('Flattened Data:', flattenedData); 
         } else {
           console.error('Unexpected data format:', result);
         }
@@ -154,7 +154,7 @@ const CVSSVectorFinder = () => {
           {expandedNodes.includes(suggestion.id) ? <FaMinus /> : <FaPlus />}
         </span>
       ) : null}
-      {suggestion.id} {suggestion.cvss_v3 || ''}
+      {suggestion.id}
       {expandedNodes.includes(suggestion.id) &&
         suggestion.children &&
         suggestion.children.map((child) => (
@@ -168,7 +168,7 @@ const CVSSVectorFinder = () => {
   const handleSuggestionClick = (suggestion) => {
     if (suggestion.cvss_v3) {
       setSelectedVector(suggestion.cvss_v3);
-      setSelectedPath(suggestion.path || 'N/A'); // Ensure path is set
+      setSelectedPath(suggestion.path || 'N/A'); 
       calculateCVSS(suggestion.cvss_v3, suggestion.path);
     } else {
       toggleNodeExpansion(suggestion.id);
