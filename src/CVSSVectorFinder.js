@@ -136,7 +136,7 @@ const CVSSVectorFinder = () => {
     );
   };
 
-  const getSuggestionValue = (suggestion) => suggestion.id;
+  const getSuggestionValue = (suggestion) => suggestion.id.replace(/_/g, ' ');
 
   const renderSuggestion = (suggestion) => (
     <div
@@ -154,7 +154,7 @@ const CVSSVectorFinder = () => {
           {expandedNodes.includes(suggestion.id) ? <FaMinus /> : <FaPlus />}
         </span>
       ) : null}
-      {suggestion.id}
+      {suggestion.id.replace(/_/g, ' ')}
       {expandedNodes.includes(suggestion.id) &&
         suggestion.children &&
         suggestion.children.map((child) => (
@@ -232,7 +232,7 @@ const CVSSVectorFinder = () => {
   };
 
   return (
-    <div className="container" style={{ position: 'relative' }}>
+    <div className="container" z>
       <h1>CVSS Vector & Score Finder</h1>
       <div className="input-container">
         <Autosuggest
