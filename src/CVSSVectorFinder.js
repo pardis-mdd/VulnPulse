@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Autosuggest from 'react-autosuggest';
-import { FaPlus, FaMinus, FaTrash } from 'react-icons/fa'; // Import FontAwesome icons
+import { FaPlus, FaMinus, FaTrash } from 'react-icons/fa';
 import './CVSSVectorFinder.css';
 
 const CVSS31 = {
@@ -43,7 +43,6 @@ function calculateCVSSFromVector(vector) {
     const I = CVSS31.Weight.CIA[metricValues['I']];
     const A = CVSS31.Weight.CIA[metricValues['A']];
 
-    // Calculate Impact SubScore and Impact
     const ImpactSubScore = 1 - ((1 - C) * (1 - I) * (1 - A));
     const Impact = S === 'C' ? CVSS31.Weight.S.C * ImpactSubScore : CVSS31.Weight.S.U * ImpactSubScore;
     const Exploitability = 8.22 * AV * AC * PR * UI;
@@ -87,6 +86,7 @@ const CVSSVectorFinder = () => {
   const [selectedVector, setSelectedVector] = useState('');
   const [calculatedScore, setCalculatedScore] = useState('');
   const [expandedNodes, setExpandedNodes] = useState([]);
+  const [selectedPath, setSelectedPath] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,9 +99,10 @@ const CVSSVectorFinder = () => {
         }
         const result = await response.json();
 
-        // Ensure data is an array
         if (Array.isArray(result.content)) {
-          setData(flattenData(result.content));
+          const flattenedData = flattenData(result.content);
+          setData(flattenedData);
+          console.log('Flattened Data:', flattenedData); // Debug output
         } else {
           console.error('Unexpected data format:', result);
         }
@@ -113,42 +114,15 @@ const CVSSVectorFinder = () => {
     fetchData();
   }, []);
 
-  const flattenData = (nodes) => {
-    const flatten = (nodes, parentPath = '') => {
-      return nodes.reduce((acc, node) => {
-        const fullPath = parentPath ? `${parentPath}/${node.id}` : node.id;
-        acc.push({ id: node.id, cvss_v3: node.cvss_v3 || '', path: fullPath, children: node.children });
-        if (node.children) {
-          acc.push(...flatten(node.children, fullPath));
-        }
-        return acc;
-      }, []);
-    };
-    return flatten(nodes);
-  };
-
-  const findNode = (nodes, id) => {
-    for (let node of nodes) {
-      if (node.id === id) return node;
+  const flattenData = (nodes, parentPath = '') => {
+    return nodes.reduce((acc, node) => {
+      const fullPath = parentPath ? `${parentPath}->${node.id}` : node.id;
+      acc.push({ id: node.id, cvss_v3: node.cvss_v3 || '', path: fullPath, children: node.children });
       if (node.children) {
-        const result = findNode(node.children, id);
-        if (result) return result;
+        acc.push(...flattenData(node.children, fullPath));
       }
-    }
-    return null;
-  };
-
-  const collectSuggestions = (node) => {
-    const suggestions = [];
-    if (node.cvss_v3) {
-      suggestions.push(node);
-    } else {
-      (node.children || []).forEach(child => {
-        suggestions.push(child);
-        suggestions.push(...collectSuggestions(child));
-      });
-    }
-    return suggestions;
+      return acc;
+    }, []);
   };
 
   const getSuggestions = (value) => {
@@ -157,12 +131,9 @@ const CVSSVectorFinder = () => {
 
     if (inputLength === 0) return [];
 
-    // Find direct matches
-    const matches = data.filter(
+    return data.filter(
       (item) => item.id.toLowerCase().slice(0, inputLength) === inputValue
     );
-
-    return matches;
   };
 
   const getSuggestionValue = (suggestion) => suggestion.id;
@@ -197,7 +168,8 @@ const CVSSVectorFinder = () => {
   const handleSuggestionClick = (suggestion) => {
     if (suggestion.cvss_v3) {
       setSelectedVector(suggestion.cvss_v3);
-      calculateCVSS(suggestion.cvss_v3);
+      setSelectedPath(suggestion.path || 'N/A'); // Ensure path is set
+      calculateCVSS(suggestion.cvss_v3, suggestion.path);
     } else {
       toggleNodeExpansion(suggestion.id);
     }
@@ -234,12 +206,13 @@ const CVSSVectorFinder = () => {
   };
 
   const clearInput = () => {
-    setValue(''); // Clear the input value
-    setSuggestions([]); // Clear suggestions
-    setCalculatedScore(''); // Clear the calculated score
+    setValue('');
+    setSuggestions([]);
+    setCalculatedScore('');
+    setSelectedPath('');
   };
 
-  const calculateCVSS = (vector) => {
+  const calculateCVSS = (vector, path) => {
     try {
       const output = calculateCVSSFromVector(vector);
       let result = '';
@@ -247,7 +220,7 @@ const CVSSVectorFinder = () => {
         result = (
           `Base score: ${output.baseMetricScore}\n` +
           `Base severity: ${output.baseSeverity}\n` +
-          `Vector string: ${output.vectorString}`
+          `Vector string: ${output.vectorString}\n` 
         );
       } else {
         result = 'An error occurred in calculating the score.';
@@ -259,7 +232,7 @@ const CVSSVectorFinder = () => {
   };
 
   return (
-    <div className="container">
+    <div className="container" style={{ position: 'relative' }}>
       <h1>CVSS Vector & Score Finder</h1>
       <div className="input-container">
         <Autosuggest
@@ -275,8 +248,8 @@ const CVSSVectorFinder = () => {
       </div>
       {calculatedScore && (
         <div className="calculated-score">
-          <h2>Calculated CVSS Score:</h2>
-          <pre>{calculatedScore}</pre>
+          <h2 style={{textAlign:'center',fontSize:'30px',color:'#04214d'}}>Calculated CVSS Score:</h2>
+          <pre className='preCalc'>{calculatedScore}</pre>
         </div>
       )}
     </div>
