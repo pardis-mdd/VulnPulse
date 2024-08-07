@@ -1,4 +1,3 @@
-
 body {
   font-family: "Pacifico", cursive;
   color: #333;
@@ -6,10 +5,10 @@ body {
   margin: 0;
   padding: 20px;
   background-image: url('../public/images/bg.jpg');
-  background-size: cover; /* Ensures the background covers the entire area */
-  background-repeat: no-repeat; /* Prevents the background from repeating */
-  background-position: center center; /* Centers the background image */
-  background-attachment: fixed; /* Keeps the background fixed during scrolling */
+  background-size: cover; 
+  background-repeat: no-repeat;
+  background-position: center center; 
+  background-attachment: fixed; 
 }
 
 .container {
@@ -117,6 +116,9 @@ ul.react-autosuggest__suggestions-list {
   vertical-align: middle;
 }
 
+.toggle-button:hover{
+  color: #0c5bd1;
+}
 .selected-vector,
 .calculated-scores {
  
