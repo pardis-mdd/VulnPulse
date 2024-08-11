@@ -1,15 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
-import {
-  Chart as ChartJS,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend,
-  BarController,
-} from "chart.js";
-import { Bar } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { Doughnut } from "react-chartjs-2";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import Autosuggest from "react-autosuggest";
@@ -18,15 +9,7 @@ import { FaArrowRight } from "react-icons/fa";
 
 import "./CVSSVectorFinder.css";
 
-ChartJS.register(
-  BarController,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const CVSS31 = {
   Weight: {
@@ -146,8 +129,9 @@ const CVSSVectorFinder = () => {
   }, []);
 
   const buildPaths = (node, vulnMap, parentPath = "") => {
-    const currentPath = parentPath ? `${parentPath} > ${node.id}` : node.id;
-
+    const currentPath = parentPath
+      ? `${parentPath} > ${node.id.replace(/_/g, " ")}`
+      : node.id.replace(/_/g, " ");
     if (node.id) {
       vulnMap[node.id] = {
         path: currentPath,
@@ -208,7 +192,11 @@ const CVSSVectorFinder = () => {
             toggleNodeExpansion(suggestion.id);
           }}
         >
-          {expandedNodes.includes(suggestion.id) ? <FaMinus /> : <FaPlus />}
+          {expandedNodes.includes(suggestion.id) ? (
+            <FaMinus className="minus-icon" />
+          ) : (
+            <FaPlus className="plus-icon" />
+          )}
         </span>
       ) : null}
       {suggestion.id.replace(/_/g, " ")}
@@ -225,11 +213,11 @@ const CVSSVectorFinder = () => {
   const handleSuggestionClick = (suggestion) => {
     const newFullPath =
       vulnerabilities[suggestion.id]?.path || suggestion.path || suggestion.id;
-    const pathSegments = newFullPath.split(" > "); 
+    const pathSegments = newFullPath.split(" > ");
     const displayPath = pathSegments[pathSegments.length - 1];
 
     if (suggestion.cvss_v3 && suggestion.cvss_v3.trim() !== "") {
-      setValue(displayPath); 
+      setValue(displayPath);
       setSelectedVector(suggestion.cvss_v3);
 
       const pathWithIcons = pathSegments.map((segment, index) => (
@@ -241,17 +229,30 @@ const CVSSVectorFinder = () => {
 
       setSelectedPath(pathWithIcons);
       calculateCVSS(suggestion.cvss_v3, newFullPath);
+    } else {
+      setValue(displayPath);
+      setSelectedVector("");
     }
   };
 
+  const onSuggestionsFetchRequested = ({ value }) => {
+    setSuggestions(getSuggestions(value));
+  };
+
+  const onSuggestionsClearRequested = () => {
+    setSuggestions([]);
+  };
+
+  const onChange = (event, { newValue }) => {
+    setValue(newValue);
+  };
+
   const toggleNodeExpansion = (nodeId) => {
-    setExpandedNodes((prevExpandedNodes) => {
-      if (prevExpandedNodes.includes(nodeId)) {
-        return prevExpandedNodes.filter((id) => id !== nodeId);
-      } else {
-        return [...prevExpandedNodes, nodeId];
-      }
-    });
+    setExpandedNodes((prevExpandedNodes) =>
+      prevExpandedNodes.includes(nodeId)
+        ? prevExpandedNodes.filter((id) => id !== nodeId)
+        : [...prevExpandedNodes, nodeId]
+    );
   };
 
   const calculateCVSS = (vector, path) => {
@@ -280,14 +281,14 @@ const CVSSVectorFinder = () => {
               result.Exploitability,
             ],
             backgroundColor: [
-              "rgba(52, 152, 219, 0.5)", 
-              "rgba(231, 76, 60, 0.5)", 
-              "rgba(46, 204, 113, 0.5)", 
+              "rgba(52, 152, 219, 0.5)",
+              "rgba(231, 76, 60, 0.5)",
+              "rgba(46, 204, 113, 0.5)",
             ],
             borderColor: [
-              "rgba(52, 152, 219, 0.8)", 
-              "rgba(231, 76, 60, 0.8)", 
-              "rgba(46, 204, 113, 0.8)", 
+              "rgba(52, 152, 219, 1)",
+              "rgba(231, 76, 60, 1)",
+              "rgba(46, 204, 113, 1)",
             ],
             borderWidth: 1,
           },
@@ -298,48 +299,22 @@ const CVSSVectorFinder = () => {
     }
   };
 
-  const onChange = (event, { newValue }) => {
-    setValue(newValue);
-  };
-
-  const onSuggestionsFetchRequested = ({ value }) => {
-    setSuggestions(getSuggestions(value));
-  };
-
-  const onSuggestionsClearRequested = () => {
-    setSuggestions([]);
+  const exportAsPDF = () => {
+    const input = chartRef.current;
+    html2canvas(input).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      pdf.addImage(imgData, "JPEG", 0, 0);
+      pdf.save("cvss-report.pdf");
+    });
   };
 
   const clear = () => {
-    setValue(""); 
-    setSelectedVector(""); 
-    setSelectedPath(""); 
-    setCalculatedScore(null); 
+    setValue("");
+    setSelectedVector("");
+    setCalculatedScore(null);
     setChartData(null);
-  };
-
-  const exportAsPDF = () => {
-    const input = chartRef.current;
-    const pdf = new jsPDF("landscape"); 
-
-    html2canvas(input, {
-      onclone: (clonedDoc) => {
-        clonedDoc.querySelector(".history-list").style.display = "none";
-      },
-      scale: 2,
-    }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const imgWidth = pdf.internal.pageSize.getWidth();
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      const contentHeight =
-        imgHeight > pdf.internal.pageSize.getHeight()
-          ? pdf.internal.pageSize.getHeight()
-          : imgHeight;
-
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, contentHeight);
-      pdf.save("cvss_report.pdf");
-    });
+    setSelectedPath("");
   };
 
   return (
@@ -370,22 +345,40 @@ const CVSSVectorFinder = () => {
         </button>
       </div>
 
-      <div className="export-container" ref={chartRef}>
-        {calculatedScore && (
-          <div className="score-details">
-            <h2 style={{ color: "#b92929" }}>
-              Calculated CVSS Score: {calculatedScore.baseMetricScore} (
-              {calculatedScore.baseSeverity})
-            </h2>
-            <p>Vector: {calculatedScore.vectorString}</p>
-            <p>Impact Subscore: {calculatedScore.Impact}</p>
-            <p>Exploitability Subscore: {calculatedScore.Exploitability}</p>
-            <p>Selected Path: {selectedPath}</p>
-          </div>
-        )}
+      <div class="horizontal-container">
+        <div className="export-container" ref={chartRef}>
+          {calculatedScore && (
+            <div className="score-details">
+              <h2>
+                Calculated CVSS Score: {calculatedScore.baseMetricScore} (
+                <span
+                  style={{
+                    color:
+                      calculatedScore.baseSeverity === "Low"
+                        ? "yellow"
+                        : calculatedScore.baseSeverity === "Medium"
+                        ? "orange"
+                        : calculatedScore.baseSeverity === "High"
+                        ? "red"
+                        : calculatedScore.baseSeverity === "Critical"
+                        ? "darkred"
+                        : "inherit",
+                  }}
+                >
+                  {calculatedScore.baseSeverity}
+                </span>
+                )
+              </h2>
+              <p>Vector: {calculatedScore.vectorString}</p>
+              <p>Impact Subscore: {calculatedScore.Impact}</p>
+              <p>Exploitability Subscore: {calculatedScore.Exploitability}</p>
+              <p>Selected Path: {selectedPath}</p>
+            </div>
+          )}
+        </div>
 
         <div className="chart-container">
-          {chartData && <Bar data={chartData} />}
+          {chartData && <Doughnut data={chartData} />}
         </div>
       </div>
 
