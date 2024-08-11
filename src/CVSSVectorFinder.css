@@ -1,10 +1,8 @@
-
 body {
   background-color: #121212;
   color: #e0e0e0;
   font-family: Arial, sans-serif;
 }
-
 
 .cvss-vector-finder {
   background-color: #1e1e1e;
@@ -73,17 +71,17 @@ body {
 .button-container {
   display: flex;
   justify-content: center;
-  gap: 10px; 
+  gap: 10px;
   margin-bottom: 20px;
 }
 
 .button-container button {
   border: 1px solid #444444;
   border-radius: 8px;
-  padding: 12px 24px;
+  padding: 10px 12px;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .clear-button {
@@ -97,37 +95,60 @@ body {
 }
 
 .export-button {
-  background-color: #3498db; 
+  background-color: #3498db;
   color: #ffffff;
 }
 
 .export-button:hover {
-  background-color: #2980b9; 
+  background-color: #2980b9;
   transform: scale(1.05);
 }
 
 .score-details {
-  margin: 20px 0;
   padding: 15px;
   background-color: #2c2c2c;
   border-radius: 8px;
+  justify-content: center;
+  align-items: center;
 }
 
 .score-details p {
+  text-align: center;
   margin: 5px 0;
+}
+.score-details h2 {
+  text-align: center;
+}
+
+.horizontal-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.export-container,
+.chart-container {
+  flex: 1;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.export-container {
+  margin-right: 20px; 
+  max-width: 55%;
+  max-height: 0%;
 }
 
 .chart-container {
-  margin: 20px 0;
   background-color: #2c2c2c;
   padding: 10px;
   border-radius: 8px;
-  width: 50%; 
-  margin: 0 auto; 
+  max-width: 20%;
 }
 
 .history-list {
-  margin-top: 20px;
+  margin-top: 70px;
 }
 
 .history-list table {
@@ -164,9 +185,9 @@ body {
 }
 
 .autosuggest-container ul {
-  list-style-type: none; 
-  padding: 0; 
-  margin: 0; 
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
 }
 
 .pdf-content {
@@ -184,27 +205,37 @@ body {
 .pdf-content .chart-container {
   margin-top: 20px;
 }
+
 .path-arrow {
   margin: 0 5px;
   color: #333;
 }
+
 .path-segment {
   font-weight: bold;
-  color: #5494d5; 
+  color: #5494d5;
 }
 
 .path-segment-icon {
-  margin: 0 5px; 
-  color: #b92929; 
-  vertical-align: middle; 
+  margin: 0 5px;
+  color: #b92929;
+  vertical-align: middle;
 }
 
 .history-path-segment {
-  color: #5494d5; 
+  color: #5494d5;
 }
 
 .history-path-segment-icon {
   margin: 0 5px;
-  color: #b92929; 
+  color: #b92929;
   vertical-align: middle;
+}
+
+.minus-icon:hover {
+  color: #b92929;
+}
+
+.plus-icon:hover {
+  color: #b92929;
 }
