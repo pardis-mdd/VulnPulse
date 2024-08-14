@@ -135,7 +135,7 @@ body {
 }
 
 .export-container {
-  margin-right: 20px; 
+  margin-right: 20px;
   max-width: 55%;
   max-height: 0%;
 }
@@ -190,19 +190,11 @@ body {
   margin: 0;
 }
 
-.pdf-content {
-  width: 100%;
-  padding: 20px;
-  box-sizing: border-box;
-  background-color: #1e1e1e;
-  color: #e0e0e0;
-}
-
-.pdf-content .score-details {
+.score-details {
   margin-bottom: 20px;
 }
 
-.pdf-content .chart-container {
+.chart-container {
   margin-top: 20px;
 }
 
@@ -237,5 +229,8 @@ body {
 }
 
 .plus-icon:hover {
+  color: #b92929;
+}
+.suggestion.has-children:hover .toggle-button {
   color: #b92929;
 }
