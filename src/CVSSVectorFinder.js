@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
-import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import Autosuggest from "react-autosuggest";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
@@ -179,36 +178,42 @@ const CVSSVectorFinder = () => {
 
   const getSuggestionValue = (suggestion) => suggestion.id.replace(/_/g, " ");
 
-  const renderSuggestion = (suggestion) => (
-    <div
-      className="suggestion"
-      onClick={() => handleSuggestionClick(suggestion)}
-    >
-      {suggestion.children ? (
-        <span
-          className="toggle-button"
-          onClick={(e) => {
-            e.stopPropagation();
+  const renderSuggestion = (suggestion) => {
+    const isExpanded = expandedNodes.includes(suggestion.id);
+    const hasChildren = suggestion.children && suggestion.children.length > 0;
+
+    return (
+      <div
+        className={`suggestion ${hasChildren ? "has-children" : ""}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (hasChildren) {
             toggleNodeExpansion(suggestion.id);
-          }}
-        >
-          {expandedNodes.includes(suggestion.id) ? (
-            <FaMinus className="minus-icon" />
-          ) : (
-            <FaPlus className="plus-icon" />
-          )}
-        </span>
-      ) : null}
-      {suggestion.id.replace(/_/g, " ")}
-      {expandedNodes.includes(suggestion.id) &&
-        suggestion.children &&
-        suggestion.children.map((child) => (
-          <div key={child.id} className="suggestion-child">
-            {renderSuggestion(child)}
-          </div>
-        ))}
-    </div>
-  );
+          } else {
+            handleSuggestionClick(suggestion);
+          }
+        }}
+      >
+        {hasChildren && (
+          <span className="toggle-button">
+            {isExpanded ? (
+              <FaMinus className="minus-icon" />
+            ) : (
+              <FaPlus className="plus-icon" />
+            )}
+          </span>
+        )}
+        {suggestion.id.replace(/_/g, " ")}
+        {isExpanded &&
+          suggestion.children &&
+          suggestion.children.map((child) => (
+            <div key={child.id} className="suggestion-child">
+              {renderSuggestion(child)}
+            </div>
+          ))}
+      </div>
+    );
+  };
 
   const handleSuggestionClick = (suggestion) => {
     const newFullPath =
@@ -233,6 +238,9 @@ const CVSSVectorFinder = () => {
       setValue(displayPath);
       setSelectedVector("");
     }
+
+    // Clear suggestions to hide them
+    setSuggestions([]);
   };
 
   const onSuggestionsFetchRequested = ({ value }) => {
@@ -299,22 +307,25 @@ const CVSSVectorFinder = () => {
     }
   };
 
-  const exportAsPDF = () => {
-    const input = chartRef.current;
-    html2canvas(input).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      pdf.addImage(imgData, "JPEG", 0, 0);
-      pdf.save("cvss-report.pdf");
-    });
-  };
-
   const clear = () => {
     setValue("");
     setSelectedVector("");
     setCalculatedScore(null);
     setChartData(null);
     setSelectedPath("");
+  };
+
+  const options = {
+    plugins: {
+      legend: {
+        position: "bottom",
+        align: "start",
+        labels: {
+          boxWidth: 10,
+          padding: 10,
+        },
+      },
+    },
   };
 
   return (
@@ -340,12 +351,9 @@ const CVSSVectorFinder = () => {
         <button className="clear-button" onClick={clear}>
           <FaTrash /> Clear
         </button>
-        <button className="export-button" onClick={exportAsPDF}>
-          Export as PDF
-        </button>
       </div>
 
-      <div class="horizontal-container">
+      <div className="horizontal-container">
         <div className="export-container" ref={chartRef}>
           {calculatedScore && (
             <div className="score-details">
@@ -377,9 +385,12 @@ const CVSSVectorFinder = () => {
           )}
         </div>
 
-        <div className="chart-container">
-          {chartData && <Doughnut data={chartData} />}
-        </div>
+        {/* Conditionally render the chart-container */}
+        {chartData && (
+          <div className="chart-container" ref={chartRef}>
+            {chartData && <Doughnut data={chartData} options={options} />}
+          </div>
+        )}
       </div>
 
       {history.length > 0 && (
