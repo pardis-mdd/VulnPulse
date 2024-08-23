@@ -7,6 +7,7 @@ import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
 import { FaArrowRight } from "react-icons/fa";
 
 import "./CVSSVectorFinder.css";
+import Cwe from "./Cwe";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -103,6 +104,7 @@ const CVSSVectorFinder = () => {
   const [chartData, setChartData] = useState(null);
   const [history, setHistory] = useState([]);
   const [vulnerabilities, setVulnerabilities] = useState({});
+  const [rawSelectedPath, setRawSelectedPath] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -231,7 +233,7 @@ const CVSSVectorFinder = () => {
           <span className="path-segment">{segment}</span>{" "}
         </React.Fragment>
       ));
-
+      setRawSelectedPath(pathSegments);
       setSelectedPath(pathWithIcons);
       calculateCVSS(suggestion.cvss_v3, newFullPath);
     } else {
@@ -381,6 +383,7 @@ const CVSSVectorFinder = () => {
               <p>Impact Subscore: {calculatedScore.Impact}</p>
               <p>Exploitability Subscore: {calculatedScore.Exploitability}</p>
               <p>Selected Path: {selectedPath}</p>
+              <p>Cwe :<Cwe rawSelectedPath ={rawSelectedPath}></Cwe></p>
             </div>
           )}
         </div>
@@ -392,7 +395,6 @@ const CVSSVectorFinder = () => {
           </div>
         )}
       </div>
-
       {history.length > 0 && (
         <div className="history-list">
           <h2>History</h2>
