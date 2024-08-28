@@ -8,6 +8,7 @@ import { FaArrowRight } from "react-icons/fa";
 
 import "./CVSSVectorFinder.css";
 import Cwe from "./Cwe";
+import Remediation from "./Remediation";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -384,6 +385,7 @@ const CVSSVectorFinder = () => {
               <p>Exploitability Subscore: {calculatedScore.Exploitability}</p>
               <p>Selected Path: {selectedPath}</p>
               <p>Cwe :<Cwe rawSelectedPath ={rawSelectedPath}></Cwe></p>
+              <p>Remediation: <Remediation rawSelectedPath ={rawSelectedPath}></Remediation></p>
             </div>
           )}
         </div>
