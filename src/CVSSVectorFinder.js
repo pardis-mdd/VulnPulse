@@ -187,7 +187,9 @@ const CVSSVectorFinder = () => {
 
     return (
       <div
-        className={`suggestion ${hasChildren ? "has-children" : ""}`}
+        className={`suggestion ${hasChildren ? "has-children" : ""} ${
+          isExpanded ? "expanded" : ""
+        }`}
         onClick={(e) => {
           e.stopPropagation();
           if (hasChildren) {
@@ -210,7 +212,10 @@ const CVSSVectorFinder = () => {
         {isExpanded &&
           suggestion.children &&
           suggestion.children.map((child) => (
-            <div key={child.id} className="suggestion-child">
+            <div
+              key={child.id}
+              className={`suggestion-child ${isExpanded ? "expanded" : ""}`}
+            >
               {renderSuggestion(child)}
             </div>
           ))}
@@ -356,47 +361,57 @@ const CVSSVectorFinder = () => {
         </button>
       </div>
 
-      <div className="horizontal-container">
-        <div className="export-container" ref={chartRef}>
-          {calculatedScore && (
-            <div className="score-details">
-              <h2>
-                Calculated CVSS Score: {calculatedScore.baseMetricScore} (
-                <span
-                  style={{
-                    color:
-                      calculatedScore.baseSeverity === "Low"
-                        ? "yellow"
-                        : calculatedScore.baseSeverity === "Medium"
-                        ? "orange"
-                        : calculatedScore.baseSeverity === "High"
-                        ? "red"
-                        : calculatedScore.baseSeverity === "Critical"
-                        ? "darkred"
-                        : "inherit",
-                  }}
-                >
-                  {calculatedScore.baseSeverity}
-                </span>
-                )
-              </h2>
-              <p>Vector: {calculatedScore.vectorString}</p>
-              <p>Impact Subscore: {calculatedScore.Impact}</p>
-              <p>Exploitability Subscore: {calculatedScore.Exploitability}</p>
-              <p>Selected Path: {selectedPath}</p>
-              <p>Cwe :<Cwe rawSelectedPath ={rawSelectedPath}></Cwe></p>
-              <p>Remediation: <Remediation rawSelectedPath ={rawSelectedPath}></Remediation></p>
+      {/* Conditional Rendering of Horizontal Container */}
+      {value && calculatedScore && (
+        <div className="horizontal-container">
+          <div className="export-container" ref={chartRef}>
+            {calculatedScore && (
+              <div className="score-details">
+                <h2>
+                  Calculated CVSS Score: {calculatedScore.baseMetricScore} (
+                  <span
+                    style={{
+                      color:
+                        calculatedScore.baseSeverity === "Low"
+                          ? "yellow"
+                          : calculatedScore.baseSeverity === "Medium"
+                          ? "orange"
+                          : calculatedScore.baseSeverity === "High"
+                          ? "red"
+                          : calculatedScore.baseSeverity === "Critical"
+                          ? "darkred"
+                          : "inherit",
+                    }}
+                  >
+                    {calculatedScore.baseSeverity}
+                  </span>
+                  )
+                </h2>
+                <p>Vector: {calculatedScore.vectorString}</p>
+                <p>Impact Subscore: {calculatedScore.Impact}</p>
+                <p>Exploitability Subscore: {calculatedScore.Exploitability}</p>
+                <p>Selected Path: {selectedPath}</p>
+                <p>
+                  <Cwe rawSelectedPath={rawSelectedPath} />
+                </p>
+              </div>
+            )}
+          </div>
+
+          {chartData && (
+            <div className="chart-container" ref={chartRef}>
+              {chartData && <Doughnut data={chartData} options={options} />}
             </div>
           )}
         </div>
+      )}
 
-        {/* Conditionally render the chart-container */}
-        {chartData && (
-          <div className="chart-container" ref={chartRef}>
-            {chartData && <Doughnut data={chartData} options={options} />}
-          </div>
-        )}
-      </div>
+      {calculatedScore && (
+        <div className="remediation-container">
+          <Remediation rawSelectedPath={rawSelectedPath} />
+        </div>
+      )}
+
       {history.length > 0 && (
         <div className="history-list">
           <h2>History</h2>
