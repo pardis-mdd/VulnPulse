@@ -2,7 +2,7 @@ import RemediationData from "./remediation_advice.json";
 import { useEffect, useState } from 'react';
 
 const Remediation = (props) => {
-  const [remediationAdvice, setRemediationAdvice] = useState([]);
+  const [remediationAdvice, setRemediationAdvice] = useState('');
   const [reference, setReference] = useState([]);
   const [remediationAdviceFound, setRemediationAdviceFound] = useState(false);
 
@@ -13,8 +13,8 @@ const Remediation = (props) => {
     const findRemediationAdviceById = (data, targetId) => {
       for (let item of data) {
         if (item.id.toLowerCase() === targetId) {
-          setRemediationAdvice(item.remediation_advice);
-          setReference(item.references);
+          setRemediationAdvice(item.remediation_advice || 'No advice available');
+          setReference(item.references || []); 
           setRemediationAdviceFound(true);
           return;
         }
@@ -36,9 +36,13 @@ const Remediation = (props) => {
           <p>{remediationAdvice}</p>
           <h2>References:</h2>
           <ul>
-            {reference.map((ref, index) => (
-              <li key={index}><a href={ref}>{ref}</a></li>
-            ))}
+            {reference.length > 0 ? (
+              reference.map((ref, index) => (
+                <li key={index}><a href={ref} target="_blank" rel="noopener noreferrer">{ref}</a></li>
+              ))
+            ) : (
+              <li>No references available</li>
+            )}
           </ul>
         </div>
       ) : (
