@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import cweData from './cwe.json'; 
 
 const Cwe = (props) => {
-    const [cwe, setCwe] = useState(null);  
+    const [cwe, setCwe] = useState([]);
     const [cweFound, setCweFound] = useState(false);
 
     const searchPrimary = props.rawSelectedPath[props.rawSelectedPath.length - 1];
@@ -25,20 +25,23 @@ const Cwe = (props) => {
         }
       };
 
-      setCwe(null);
+      
+      setCwe([]);
       setCweFound(false);
-
-     
       findCweById(cweData.content, searchpathPrimary);
 
+     
       if (!cweFound && searchpathFallback) {
         findCweById(cweData.content, searchpathFallback);
       }
-    }, [searchpathPrimary, searchpathFallback, cweFound]);
+    }, [searchpathPrimary, searchpathFallback]);
+
     return (
       <div>  
-        {cweFound && cwe ? ( 
-          <h4>{cwe}</h4>
+        {cweFound && cwe ? (
+          cwe.map((code, index) => (
+            <h4 key={index}>{code}</h4>
+          ))
         ) : (
           <h3>No CWE found for {searchPrimary} or {searchFallback}</h3>
         )}
