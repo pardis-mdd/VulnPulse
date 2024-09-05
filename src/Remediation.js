@@ -31,17 +31,13 @@ const Remediation = (props) => {
   }, [searchpathPrimary]);
 
   const formatRemediationAdvice = (advice) => {
-    // Split the advice text by numbers followed by a period and a space (like "1. ", "2. ", etc.)
     const parts = advice.split(/(\d+\.\s)/).filter(Boolean);
 
     return parts.map((part, index) => {
-      // Check if the part is a numbered line (like "1. ", "2. ", etc.)
       if (/\d+\.\s/.test(part)) {
-        // Combine the number with the next content part
         const nextContent = parts[index + 1] || "";
         const combinedContent = part + nextContent;
 
-        // Convert **...** to bold text
         const boldTextParts = combinedContent
           .split(/\*\*(.*?)\*\*/g)
           .map((chunk, i) => {
@@ -50,7 +46,7 @@ const Remediation = (props) => {
 
         return <p key={index}>{boldTextParts}</p>;
       }
-      return null; // Skip non-numbered parts
+      return null;
     });
   };
 
