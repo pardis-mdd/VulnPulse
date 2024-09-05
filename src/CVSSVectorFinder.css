@@ -1,17 +1,18 @@
 .cvss-vector-finder {
   font-family: "Roboto", sans-serif;
-  max-width: 1200px;
+  max-width: 80%;
   margin: 0 auto;
   padding: 20px;
   background-color: #f8f9fa;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
+
 ul,
 ol {
-  list-style: none; /* Removes bullet points or numbers */
-  padding: 0; /* Removes default padding */
-  margin: 0; /* Removes default margin */
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .cvss-vector-finder h1 {
@@ -27,7 +28,8 @@ ol {
 }
 
 .react-autosuggest__input {
-  width: 95%;
+  width: 100%;
+  max-width: 95%;
   padding: 10px 15px;
   font-size: 1rem;
   border: 1px solid #ced4da;
@@ -57,34 +59,30 @@ ol {
 }
 
 .suggestion-child {
-  padding-left: 20px; /* Indent child items */
-  background-color: #ffffff; /* Default background color for child items */
+  padding-left: 20px;
+  background-color: #ffffff;
   transition: background-color 0.3s ease;
 }
 
-/* Hover effect for child items */
 .suggestion-child:hover {
-  background-color: #e0e0e0; /* Background color on hover */
-}
-.suggestion.has-children:hover .toggle-button .plus-icon,
-.suggestion.has-children:hover .toggle-button .minus-icon {
-  color: #c0392b; /* Color when hovered */
-}
-.suggestion:hover {
-  background-color: #ecf0f1;
+  background-color: #e0e0e0;
 }
 
-.suggestion-child {
-  padding-left: 20px;
+.suggestion.has-children:hover .toggle-button .plus-icon,
+.suggestion.has-children:hover .toggle-button .minus-icon {
+  color: #c0392b;
+}
+
+.suggestion:hover {
+  background-color: #ecf0f1;
 }
 
 .toggle-button {
   margin-right: 5px;
   display: inline-block;
 }
+
 .toggle-button:hover {
-  margin-right: 5px;
-  display: inline-block;
   color: #c0392b;
 }
 
@@ -136,17 +134,7 @@ ol {
   padding-left: 15px;
 }
 
-.chart-container {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #ffffff;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  height: 300px;
-}
+.chart-container,
 .export-container {
   flex: 1;
   display: flex;
@@ -216,4 +204,71 @@ ol {
 
 .history-path-segment {
   font-weight: bold;
+}
+
+/* Responsive Adjustments */
+
+@media (max-width: 1017px) and (min-width: 768px) {
+  .history-list h2 {
+    font-size: 1.25rem;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .history-list table {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 768px) {
+  .cvss-vector-finder {
+    padding: 15px;
+    max-width: 100%;
+  }
+
+  .cvss-vector-finder h1 {
+    font-size: 1.75rem;
+  }
+
+  .horizontal-container {
+    flex-direction: column;
+  }
+
+  .score-details h2 {
+    font-size: 1.25rem;
+  }
+
+  .chart-container,
+  .export-container {
+    height: 250px;
+    margin-bottom: 20px;
+  }
+
+  .history-list h2 {
+    font-size: 1.25rem;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .history-list table {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+  }
 }
