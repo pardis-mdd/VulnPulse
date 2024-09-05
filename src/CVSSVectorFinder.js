@@ -1,14 +1,13 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
-import html2canvas from "html2canvas";
 import Autosuggest from "react-autosuggest";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
 import { FaArrowRight } from "react-icons/fa";
-
 import "./CVSSVectorFinder.css";
 import Cwe from "./Cwe";
 import Remediation from "./Remediation";
+import cvssData from "./cvss_v3.json"; // Import JSON data locally
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -414,40 +413,44 @@ const CVSSVectorFinder = () => {
 
       {history.length > 0 && (
         <div className="history-list">
-          <h2>History</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Vector</th>
-                <th>Base Score</th>
-                <th>Severity</th>
-                <th>Impact</th>
-                <th>Exploitability</th>
-                <th>Path</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.map((entry, index) => (
-                <tr key={index}>
-                  <td>{entry.vector}</td>
-                  <td>{entry.baseMetricScore}</td>
-                  <td>{entry.baseSeverity}</td>
-                  <td>{entry.Impact}</td>
-                  <td>{entry.Exploitability}</td>
-                  <td>
-                    {entry.fullPath.split(" > ").map((segment, i) => (
-                      <React.Fragment key={i}>
-                        {i > 0 && (
-                          <FaArrowRight className="history-path-segment-icon" />
-                        )}
-                        <span className="history-path-segment">{segment}</span>
-                      </React.Fragment>
-                    ))}
-                  </td>
+          <div class="table-responsive">
+            <h2>History</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Vector</th>
+                  <th>Base Score</th>
+                  <th>Severity</th>
+                  <th>Impact</th>
+                  <th>Exploitability</th>
+                  <th>Path</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {history.map((entry, index) => (
+                  <tr key={index}>
+                    <td>{entry.vector}</td>
+                    <td>{entry.baseMetricScore}</td>
+                    <td>{entry.baseSeverity}</td>
+                    <td>{entry.Impact}</td>
+                    <td>{entry.Exploitability}</td>
+                    <td>
+                      {entry.fullPath.split(" > ").map((segment, i) => (
+                        <React.Fragment key={i}>
+                          {i > 0 && (
+                            <FaArrowRight className="history-path-segment-icon" />
+                          )}
+                          <span className="history-path-segment">
+                            {segment}
+                          </span>
+                        </React.Fragment>
+                      ))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
