@@ -7,7 +7,7 @@ import { FaArrowRight } from "react-icons/fa";
 import "./CVSSVectorFinder.css";
 import Cwe from "./Cwe";
 import Remediation from "./Remediation";
-import cvssData from "./cvss_v3.json"; // Import JSON data locally
+
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
