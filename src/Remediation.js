@@ -1,8 +1,8 @@
 import RemediationData from "./remediation_advice.json";
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 const Remediation = (props) => {
-  const [remediationAdvice, setRemediationAdvice] = useState("");
+  const [remediationAdvice, setRemediationAdvice] = useState('');
   const [reference, setReference] = useState([]);
   const [remediationAdviceFound, setRemediationAdviceFound] = useState(false);
 
@@ -13,10 +13,8 @@ const Remediation = (props) => {
     const findRemediationAdviceById = (data, targetId) => {
       for (let item of data) {
         if (item.id.toLowerCase() === targetId) {
-          setRemediationAdvice(
-            item.remediation_advice || "No advice available"
-          );
-          setReference(item.references || []);
+          setRemediationAdvice(item.remediation_advice || 'No advice available');
+          setReference(item.references || []); 
           setRemediationAdviceFound(true);
           return;
         }
@@ -29,24 +27,17 @@ const Remediation = (props) => {
 
     findRemediationAdviceById(RemediationData.content, searchpathPrimary);
   }, [searchpathPrimary]);
+  
+  const formatAdvice = (advice) => {
 
-  const formatRemediationAdvice = (advice) => {
-    const parts = advice.split(/(\d+\.\s)/).filter(Boolean);
+    return advice.split(/\n/).map((item, index) => {
+      item = item.trim();
 
-    return parts.map((part, index) => {
-      if (/\d+\.\s/.test(part)) {
-        const nextContent = parts[index + 1] || "";
-        const combinedContent = part + nextContent;
-
-        const boldTextParts = combinedContent
-          .split(/\*\*(.*?)\*\*/g)
-          .map((chunk, i) => {
-            return i % 2 === 1 ? <strong key={i}>{chunk}</strong> : chunk;
-          });
-
-        return <p key={index}>{boldTextParts}</p>;
-      }
-      return null;
+      const formattedItem = item.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  
+      return (
+        <p key={index} dangerouslySetInnerHTML={{ __html: formattedItem }} />
+      );
     });
   };
 
@@ -55,19 +46,15 @@ const Remediation = (props) => {
       {remediationAdviceFound ? (
         <div>
           <h2>Remediation Advice:</h2>
-          <div>{formatRemediationAdvice(remediationAdvice)}</div>
+          <p>{formatAdvice(remediationAdvice)}</p>
           <h2>References:</h2>
           <ul>
             {reference.length > 0 ? (
               reference.map((ref, index) => (
-                <li key={index}>
-                  <a href={ref} target="_blank" rel="noopener noreferrer">
-                    {ref}
-                  </a>
-                </li>
+                <li key={index}><a href={ref} target="_blank" rel="noopener noreferrer">{ref}</a></li>
               ))
             ) : (
-              <li>No references available</li>
+              <li>No references available.</li>
             )}
           </ul>
         </div>
