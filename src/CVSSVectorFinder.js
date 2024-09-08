@@ -7,7 +7,7 @@ import { FaArrowRight } from "react-icons/fa";
 import "./CVSSVectorFinder.css";
 import Cwe from "./Cwe";
 import Remediation from "./Remediation";
-
+import cvssData from "./cvss_v3.json";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -107,26 +107,11 @@ const CVSSVectorFinder = () => {
   const [rawSelectedPath, setRawSelectedPath] = useState({});
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          "https://raw.githubusercontent.com/bugcrowd/vulnerability-rating-taxonomy/master/mappings/cvss_v3/cvss_v3.json"
-        );
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const result = await response.json();
-        const vulnMap = {};
-        result.content.forEach((node) => buildPaths(node, vulnMap));
-        setVulnerabilities(vulnMap);
-        const flattenedData = flattenData(result.content);
-        setData(flattenedData);
-      } catch (error) {
-        console.error("Error fetching the data:", error);
-      }
-    };
-
-    fetchData();
+    const vulnMap = {};
+    cvssData.content.forEach((node) => buildPaths(node, vulnMap));
+    setVulnerabilities(vulnMap);
+    const flattenedData = flattenData(cvssData.content);
+    setData(flattenedData);
   }, []);
 
   const buildPaths = (node, vulnMap, parentPath = "") => {
@@ -246,7 +231,6 @@ const CVSSVectorFinder = () => {
       setSelectedVector("");
     }
 
-    // Clear suggestions to hide them
     setSuggestions([]);
   };
 
