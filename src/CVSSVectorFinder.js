@@ -8,6 +8,7 @@ import "./CVSSVectorFinder.css";
 import Cwe from "./Cwe";
 import Remediation from "./Remediation";
 import cvssData from "./cvss_v3.json";
+import Fuse from "fuse.js";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -152,15 +153,17 @@ const CVSSVectorFinder = () => {
     }, []);
   };
 
+  const fuseOptions = {
+    keys: ["id"],
+    threshold: 0.4,
+  };
   const getSuggestions = (value) => {
     const inputValue = value.trim().toLowerCase();
-    const inputLength = inputValue.length;
+    if (inputValue.length === 0) return [];
 
-    if (inputLength === 0) return [];
+    const fuse = new Fuse(data, fuseOptions);
 
-    return data.filter(
-      (item) => item.id.toLowerCase().slice(0, inputLength) === inputValue
-    );
+    return fuse.search(inputValue).map((result) => result.item);
   };
 
   const getSuggestionValue = (suggestion) => suggestion.id.replace(/_/g, " ");
@@ -217,12 +220,27 @@ const CVSSVectorFinder = () => {
       setValue(displayPath);
       setSelectedVector(suggestion.cvss_v3);
 
-      const pathWithIcons = pathSegments.map((segment, index) => (
-        <React.Fragment key={index}>
-          {index > 0 && <FaArrowRight className="path-segment-icon" />}{" "}
-          <span className="path-segment">{segment}</span>{" "}
-        </React.Fragment>
-      ));
+      const pathWithIcons = pathSegments.map((segment, index) => {
+        let fontWeight;
+
+        if (index === 0) {
+          fontWeight = 800;
+        } else if (index === 1) {
+          fontWeight = 600;
+        } else {
+          fontWeight = 400;
+        }
+
+        return (
+          <React.Fragment key={index}>
+            {index > 0 && <FaArrowRight className="path-segment-icon" />}{" "}
+            <span className="path-segment" style={{ fontWeight }}>
+              {segment}
+            </span>{" "}
+          </React.Fragment>
+        );
+      });
+
       setRawSelectedPath(pathSegments);
       setSelectedPath(pathWithIcons);
       calculateCVSS(suggestion.cvss_v3, newFullPath);
@@ -305,6 +323,26 @@ const CVSSVectorFinder = () => {
     setChartData(null);
     setSelectedPath("");
   };
+  const chartCenterTextPlugin = {
+    id: "centerText",
+    beforeDraw: (chart) => {
+      if (chart.config.options.elements.center) {
+        const { ctx } = chart;
+        const { width, height } = chart.chartArea;
+        const centerX = width / 2 + chart.chartArea.left;
+        const centerY = height / 2 + chart.chartArea.top;
+        const score = chart.config.options.elements.center.text;
+
+        ctx.save();
+        ctx.font = "bold 24px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = chart.config.options.elements.center.color || "#000";
+        ctx.fillText(score, centerX, centerY);
+      }
+    },
+  };
+  ChartJS.register(chartCenterTextPlugin);
 
   const options = {
     plugins: {
@@ -316,6 +354,18 @@ const CVSSVectorFinder = () => {
           padding: 10,
         },
       },
+    },
+    elements: {
+      center: {
+        text: calculatedScore
+          ? `Score: ${calculatedScore.baseMetricScore}`
+          : "",
+        color: "#545c56",
+      },
+    },
+    animation: {
+      duration: 3500,
+      easing: "easeInOutCubic",
     },
   };
 
@@ -344,12 +394,12 @@ const CVSSVectorFinder = () => {
         </button>
       </div>
 
-      {/* Conditional Rendering of Horizontal Container */}
       {value && calculatedScore && (
         <div className="horizontal-container">
           <div className="export-container" ref={chartRef}>
             {calculatedScore && (
               <div className="score-details">
+                <p> {selectedPath}</p>
                 <h2>
                   Calculated CVSS Score: {calculatedScore.baseMetricScore} (
                   <span
@@ -370,10 +420,11 @@ const CVSSVectorFinder = () => {
                   </span>
                   )
                 </h2>
+
                 <p>Vector: {calculatedScore.vectorString}</p>
                 <p>Impact Subscore: {calculatedScore.Impact}</p>
                 <p>Exploitability Subscore: {calculatedScore.Exploitability}</p>
-                <p>Selected Path: {selectedPath}</p>
+
                 <p>
                   <Cwe rawSelectedPath={rawSelectedPath} />
                 </p>
