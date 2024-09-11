@@ -43,7 +43,7 @@ const Cwe = (props) => {
         cwe.map((code, index) => <h4 key={index}>{code}</h4>)
       ) : (
         <h3>
-          No CWE found for {searchPrimary} or {searchFallback}
+         
         </h3>
       )}
     </div>

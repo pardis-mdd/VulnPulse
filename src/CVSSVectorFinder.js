@@ -2,13 +2,14 @@ import React, { useRef, useEffect, useState } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import Autosuggest from "react-autosuggest";
-import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
+import { FaTrash, FaPlus, FaMinus, FaTextWidth } from "react-icons/fa";
 import { FaArrowRight } from "react-icons/fa";
 import "./CVSSVectorFinder.css";
 import Cwe from "./Cwe";
 import Remediation from "./Remediation";
 import cvssData from "./cvss_v3.json";
 import Fuse from "fuse.js";
+
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -244,6 +245,7 @@ const CVSSVectorFinder = () => {
       setRawSelectedPath(pathSegments);
       setSelectedPath(pathWithIcons);
       calculateCVSS(suggestion.cvss_v3, newFullPath);
+     
     } else {
       setValue(displayPath);
       setSelectedVector("");
@@ -271,6 +273,7 @@ const CVSSVectorFinder = () => {
         : [...prevExpandedNodes, nodeId]
     );
   };
+  
 
   const calculateCVSS = (vector, path) => {
     const result = calculateCVSSFromVector(vector);
@@ -285,31 +288,45 @@ const CVSSVectorFinder = () => {
         Exploitability: result.Exploitability,
         fullPath: path,
       };
-
+      
+      const getBackgroundColor = (severity) => {
+        return severity === "Low"
+          ? "rgba(255, 255, 0, 0.5)" // Yellow
+          : severity === "Medium"
+          ? "rgba(255, 165, 0, 0.5)" // Orange
+          : severity === "High"
+          ? "rgba(255, 0, 0, 0.5)" // Red
+          : severity === "Critical"
+          ? "rgba(139, 0, 0, 0.5)" // Dark Red
+          : "rgba(52, 152, 219, 0.5)"; // Default: Blue
+      };
       setHistory((prevHistory) => [...prevHistory, newHistoryEntry]);
       setChartData({
-        labels: ["Base Score", "Impact", "Exploitability"],
+        labels: ["Base Score", ""],
         datasets: [
           {
-            label: "CVSS Metrics",
+            label: "CVSS Score",
             data: [
               result.baseMetricScore,
-              result.Impact,
-              result.Exploitability,
+              10 - result.baseMetricScore,
             ],
+          
             backgroundColor: [
-              "rgba(52, 152, 219, 0.5)",
-              "rgba(231, 76, 60, 0.5)",
-              "rgba(46, 204, 113, 0.5)",
+              getBackgroundColor(result.baseSeverity),
+              "rgba(0,0,0,0.1)",
+             
             ],
             borderColor: [
-              "rgba(52, 152, 219, 1)",
-              "rgba(231, 76, 60, 1)",
-              "rgba(46, 204, 113, 1)",
+              getBackgroundColor(result.baseSeverity),
+              "rgba(0,0,0,0.1)",
+              
             ],
+           
             borderWidth: 1,
           },
         ],
+       
+        
       });
     } else {
       console.error("Error calculating CVSS:", result.error);
@@ -347,6 +364,7 @@ const CVSSVectorFinder = () => {
   const options = {
     plugins: {
       legend: {
+        display: false,
         position: "bottom",
         align: "start",
         labels: {
@@ -358,7 +376,7 @@ const CVSSVectorFinder = () => {
     elements: {
       center: {
         text: calculatedScore
-          ? `Score: ${calculatedScore.baseMetricScore}`
+          ? `CVSS: ${calculatedScore.baseMetricScore}`
           : "",
         color: "#545c56",
       },
@@ -401,7 +419,7 @@ const CVSSVectorFinder = () => {
               <div className="score-details">
                 <p> {selectedPath}</p>
                 <h2>
-                  Calculated CVSS Score: {calculatedScore.baseMetricScore} (
+                   CVSS Score: {calculatedScore.baseMetricScore} (
                   <span
                     style={{
                       color:
@@ -421,7 +439,7 @@ const CVSSVectorFinder = () => {
                   )
                 </h2>
 
-                <p>Vector: {calculatedScore.vectorString}</p>
+                <p style={{ fontWeight: 'bold' }}>Vector: {calculatedScore.vectorString}</p>
                 <p>Impact Subscore: {calculatedScore.Impact}</p>
                 <p>Exploitability Subscore: {calculatedScore.Exploitability}</p>
 
@@ -434,16 +452,22 @@ const CVSSVectorFinder = () => {
 
           {chartData && (
             <div className="chart-container" ref={chartRef}>
+            <div className="chart-wrapper">
               {chartData && <Doughnut data={chartData} options={options} />}
             </div>
+            <div className="description-container">
+              <p className="chart-description">{calculatedScore.vectorString}</p>
+              <button className="copy-button" onClick={() => navigator.clipboard.writeText(calculatedScore.vectorString)}>
+                Copy
+              </button>
+            </div>
+          </div>
           )}
         </div>
       )}
-
-      {calculatedScore && (
-        <div className="remediation-container">
-          <Remediation rawSelectedPath={rawSelectedPath} />
-        </div>
+      
+      {value && calculatedScore && (
+          <Remediation rawSelectedPath={rawSelectedPath} />  
       )}
 
       {history.length > 0 && (

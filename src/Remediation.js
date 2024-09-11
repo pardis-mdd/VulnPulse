@@ -1,5 +1,6 @@
 import RemediationData from "./remediation_advice.json";
 import { useEffect, useState } from 'react';
+import "./CVSSVectorFinder.css";
 
 const Remediation = (props) => {
   const [remediationAdvice, setRemediationAdvice] = useState('');
@@ -10,10 +11,13 @@ const Remediation = (props) => {
   const searchpathPrimary = searchPrimary.replace(/ /g, "_").toLowerCase();
 
   useEffect(() => {
+    setRemediationAdvice('');
+    setReference([]);
+    setRemediationAdviceFound(false);
     const findRemediationAdviceById = (data, targetId) => {
       for (let item of data) {
         if (item.id.toLowerCase() === targetId) {
-          setRemediationAdvice(item.remediation_advice || 'No advice available');
+          setRemediationAdvice(item.remediation_advice );
           setReference(item.references || []); 
           setRemediationAdviceFound(true);
           return;
@@ -29,11 +33,13 @@ const Remediation = (props) => {
   }, [searchpathPrimary]);
   
   const formatAdvice = (advice) => {
-
     return advice.split(/\n/).map((item, index) => {
       item = item.trim();
-
-      const formattedItem = item.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  
+      // Replace text between ** and ` with <strong>
+      const formattedItem = item
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Existing ** to bold replacement
+        .replace(/`(.*?)`/g, "<strong>$1</strong>"); // New ` to bold replacement
   
       return (
         <p key={index} dangerouslySetInnerHTML={{ __html: formattedItem }} />
@@ -42,27 +48,31 @@ const Remediation = (props) => {
   };
 
   return (
-    <div>
-      {remediationAdviceFound ? (
-        <div>
-          <h2>Remediation Advice:</h2>
-          <p>{formatAdvice(remediationAdvice)}</p>
-          <h2>References:</h2>
-          <ul>
-            {reference.length > 0 ? (
-              reference.map((ref, index) => (
-                <li key={index}><a href={ref} target="_blank" rel="noopener noreferrer">{ref}</a></li>
-              ))
-            ) : (
-              <li>No references available.</li>
-            )}
-          </ul>
-        </div>
-      ) : (
-        <p>No remediation advice found for the selected CWE.</p>
-      )}
-    </div>
-  );
-};
+    remediationAdviceFound && (remediationAdvice || reference.length > 0) ? (
+      <div className="remediation-container">
+        {remediationAdvice ? (
+          <div>
+            <h2>Remediation Advice:</h2>
+            <div>{formatAdvice(remediationAdvice)}</div>
+          </div>
+        ) : null}
+  
+        {reference.length > 0 ? (
+          <div>
+            <h2>References:</h2>
+            <ul>
+              {reference.map((ref, index) => (
+                <li key={index}>
+                  <a href={ref} target="_blank" rel="noopener noreferrer">
+                    {ref}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+    ) : null
+  );}  
 
 export default Remediation;
