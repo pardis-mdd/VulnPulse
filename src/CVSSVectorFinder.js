@@ -2,14 +2,15 @@ import React, { useRef, useEffect, useState } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import Autosuggest from "react-autosuggest";
-import { FaTrash, FaPlus, FaMinus, FaTextWidth } from "react-icons/fa";
+import { FaTrash, FaPlus, FaMinus, FaCopy } from "react-icons/fa";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { FaArrowRight } from "react-icons/fa";
 import "./CVSSVectorFinder.css";
 import Cwe from "./Cwe";
 import Remediation from "./Remediation";
 import cvssData from "./cvss_v3.json";
 import Fuse from "fuse.js";
-
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -107,6 +108,14 @@ const CVSSVectorFinder = () => {
   const [history, setHistory] = useState([]);
   const [vulnerabilities, setVulnerabilities] = useState({});
   const [rawSelectedPath, setRawSelectedPath] = useState({});
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(calculatedScore.vectorString);
+    toast.success("Copied!", {
+      position: "top-right",
+      autoClose: 1000,
+    });
+  };
 
   useEffect(() => {
     const vulnMap = {};
@@ -225,17 +234,20 @@ const CVSSVectorFinder = () => {
         let fontWeight;
 
         if (index === 0) {
-          fontWeight = 800;
+          fontWeight = 900;
         } else if (index === 1) {
           fontWeight = 600;
         } else {
-          fontWeight = 400;
+          fontWeight = 300;
         }
 
         return (
           <React.Fragment key={index}>
             {index > 0 && <FaArrowRight className="path-segment-icon" />}{" "}
-            <span className="path-segment" style={{ fontWeight }}>
+            <span
+              className="path-segment"
+              style={{ fontWeight, fontSize: "1.2rem" }}
+            >
               {segment}
             </span>{" "}
           </React.Fragment>
@@ -245,7 +257,6 @@ const CVSSVectorFinder = () => {
       setRawSelectedPath(pathSegments);
       setSelectedPath(pathWithIcons);
       calculateCVSS(suggestion.cvss_v3, newFullPath);
-     
     } else {
       setValue(displayPath);
       setSelectedVector("");
@@ -273,7 +284,6 @@ const CVSSVectorFinder = () => {
         : [...prevExpandedNodes, nodeId]
     );
   };
-  
 
   const calculateCVSS = (vector, path) => {
     const result = calculateCVSSFromVector(vector);
@@ -288,7 +298,7 @@ const CVSSVectorFinder = () => {
         Exploitability: result.Exploitability,
         fullPath: path,
       };
-      
+
       const getBackgroundColor = (severity) => {
         return severity === "Low"
           ? "rgba(255, 255, 0, 0.5)" // Yellow
@@ -298,7 +308,7 @@ const CVSSVectorFinder = () => {
           ? "rgba(255, 0, 0, 0.5)" // Red
           : severity === "Critical"
           ? "rgba(139, 0, 0, 0.5)" // Dark Red
-          : "rgba(52, 152, 219, 0.5)"; // Default: Blue
+          : "rgba(52, 152, 219,0.5)"; // Default: Blue
       };
       setHistory((prevHistory) => [...prevHistory, newHistoryEntry]);
       setChartData({
@@ -306,27 +316,20 @@ const CVSSVectorFinder = () => {
         datasets: [
           {
             label: "CVSS Score",
-            data: [
-              result.baseMetricScore,
-              10 - result.baseMetricScore,
-            ],
-          
+            data: [result.baseMetricScore, 10 - result.baseMetricScore],
+
             backgroundColor: [
               getBackgroundColor(result.baseSeverity),
               "rgba(0,0,0,0.1)",
-             
             ],
             borderColor: [
               getBackgroundColor(result.baseSeverity),
               "rgba(0,0,0,0.1)",
-              
             ],
-           
+
             borderWidth: 1,
           },
         ],
-       
-        
       });
     } else {
       console.error("Error calculating CVSS:", result.error);
@@ -375,9 +378,7 @@ const CVSSVectorFinder = () => {
     },
     elements: {
       center: {
-        text: calculatedScore
-          ? `CVSS: ${calculatedScore.baseMetricScore}`
-          : "",
+        text: calculatedScore ? `CVSS: ${calculatedScore.baseMetricScore}` : "",
         color: "#545c56",
       },
     },
@@ -419,7 +420,7 @@ const CVSSVectorFinder = () => {
               <div className="score-details">
                 <p> {selectedPath}</p>
                 <h2>
-                   CVSS Score: {calculatedScore.baseMetricScore} (
+                  CVSS Score: {calculatedScore.baseMetricScore} (
                   <span
                     style={{
                       color:
@@ -439,7 +440,6 @@ const CVSSVectorFinder = () => {
                   )
                 </h2>
 
-                <p style={{ fontWeight: 'bold' }}>Vector: {calculatedScore.vectorString}</p>
                 <p>Impact Subscore: {calculatedScore.Impact}</p>
                 <p>Exploitability Subscore: {calculatedScore.Exploitability}</p>
 
@@ -452,22 +452,23 @@ const CVSSVectorFinder = () => {
 
           {chartData && (
             <div className="chart-container" ref={chartRef}>
-            <div className="chart-wrapper">
-              {chartData && <Doughnut data={chartData} options={options} />}
+              <div className="chart-wrapper">
+                {chartData && <Doughnut data={chartData} options={options} />}
+              </div>
+              <div className="description-container">
+                <p className="chart-description">
+                  {calculatedScore.vectorString}
+                </p>
+                <FaCopy className="copy-button" onClick={handleCopy} />
+                <ToastContainer />
+              </div>
             </div>
-            <div className="description-container">
-              <p className="chart-description">{calculatedScore.vectorString}</p>
-              <button className="copy-button" onClick={() => navigator.clipboard.writeText(calculatedScore.vectorString)}>
-                Copy
-              </button>
-            </div>
-          </div>
           )}
         </div>
       )}
-      
+
       {value && calculatedScore && (
-          <Remediation rawSelectedPath={rawSelectedPath} />  
+        <Remediation rawSelectedPath={rawSelectedPath} />
       )}
 
       {history.length > 0 && (
