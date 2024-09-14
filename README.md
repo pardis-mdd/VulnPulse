@@ -29,6 +29,8 @@ To get started with VulnPulse locally, follow these steps:
    ```bash
    npm install
    npm install react-chartjs-2 html2canvas react-icons fuse.js
+   npm install react-toastify
+
    ```
 
 3. **Run the Application:**
