@@ -24,20 +24,26 @@ ol {
 }
 
 .autosuggest-container {
+  text-align: left;
   margin-bottom: 20px;
 }
 
 .react-autosuggest__input {
   width: 100%;
-  max-width: 95%;
-  padding: 10px 15px;
+  padding: 10px;
   font-size: 1rem;
   border: 1px solid #ced4da;
   border-radius: 4px;
   outline: none;
   transition: border-color 0.3s;
+  box-sizing: border-box;
 }
 
+.autosuggest-container input::placeholder {
+  color: gray;
+  font-size: 14px;
+  opacity: 1;
+}
 .react-autosuggest__input:focus {
   border-color: #3498db;
 }
